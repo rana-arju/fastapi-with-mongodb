@@ -6,7 +6,7 @@ import io, docx
 from pdf2image import convert_from_bytes
 
 router = APIRouter(
-    prefix="/extract",
+    prefix="/api/v1/extract",
     tags=["Extract"]
 )
 

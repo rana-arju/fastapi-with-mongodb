@@ -7,7 +7,7 @@ app = FastAPI()
 
 
 router = APIRouter(
-    prefix="/users",
+    prefix="/api/v1/users",
     tags=["Users"]
 )
 

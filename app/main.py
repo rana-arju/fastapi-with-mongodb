@@ -3,12 +3,17 @@ from app.routers import user
 from app.routers import extract
 from fastapi.middleware.cors import CORSMiddleware
 from app.database.database import connect_to_mongo, close_mongo_connection,init_db
+from app.core.error_handler import init_error_handlers
+from app.core.logger import logger
+import asyncio
 
 app = FastAPI(
     title="AI Analysis API",
     description="API for AI-powered analysis of documents, audio, and text files",
     version="1.0.0"
     )
+logger.info("User created successfully")
+logger.error("Failed to connect to MongoDB")
 
 # CORS configuration
 app.add_middleware(
@@ -27,11 +32,27 @@ app.include_router(extract.router)
 @app.on_event("startup")
 async def on_startup():
     await init_db()
+    logger.info("Connected to MongoDB successfully!")
+
 
 @app.on_event("shutdown")
 async def on_shutdown():
-    await close_mongo_connection()
+    try:
+        await close_mongo_connection()
+        logger.info("MongoDB connection closed.")
+    except asyncio.CancelledError:
+        pass
 
 @app.get("/")
 def root():
     return {"message": "Server Runing...."}
+@app.get("/health")
+def health_check():
+    return {"status": "healthy", "message": "API is running normally"}
+# Global error handler
+init_error_handlers(app)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
